@@ -10,9 +10,54 @@ Mojolicious::Plugin::LocaleTextDomainOO - Mojolicious Plugin
     # Mojolicious::Lite
     plugin 'LocaleTextDomainOO';
 
+Plugin configuration
+
+    # your app in startup
+    $self->plugin('LocaleTextDomainOO',
+      {
+          file_type => 'po',              # or 'mo'. default: po
+          default_language => 'ja',       # default en
+          plugins => [                    # more Locale::TextDomain::OO plugins.
+              qw/ +Your::Special::Plugin  # default Expand::Gettext::DomainAndCategory plugin onry.
+          /],
+      }
+    );
+    
+    $self->lexicon(
+        {
+            search_dirs => [qw(your/my_app/locale)],
+            # gettext_to_maketext => $boolean,
+            decode => 1,
+            data   => [ '*::' => '*.po' ],
+        }
+    );
+
 # DESCRIPTION
 
 [Mojolicious::Plugin::LocaleTextDomainOO](https://metacpan.org/pod/Mojolicious::Plugin::LocaleTextDomainOO) is a [Mojolicious](https://metacpan.org/pod/Mojolicious) plugin.
+
+# OPTIONS
+
+# HELPERS
+
+## `lexicon`
+
+    $self->lexicon(
+        {
+            search_dirs => [qw(your/my_app/locale)],
+            gettext_to_maketext => $boolean,
+            decode => $boolean,
+            data   => [
+                '*::' => '*.po',
+                '*:CATEGORY:DOMAIN' => '*/test.po',
+            ],
+        }
+    );
+
+Gettext po or mo file as lexicon.
+Locale::TextDomain::OO::Lexicon::File::(PO/MO) object.
+[Locale::TextDomain::OO::Lexicon::File::PO](https://metacpan.org/pod/Locale::TextDomain::OO::Lexicon::File::PO)
+[Locale::TextDomain::OO::Lexicon::File::MO](https://metacpan.org/pod/Locale::TextDomain::OO::Lexicon::File::MO)
 
 # METHODS
 
