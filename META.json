@@ -47,6 +47,7 @@
       },
       "runtime" : {
          "requires" : {
+            "Locale::TextDomain::OO" : "1.023",
             "Mojolicious" : "6.64"
          }
       }
