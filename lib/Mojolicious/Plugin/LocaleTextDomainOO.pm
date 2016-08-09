@@ -23,8 +23,8 @@ sub register {
     };
 
     my $lexicon;
-    if   ( $plugin_config->{file_type} eq 'mo' ) { $lexicon = $plugin->mo }
-    else                                         { $lexicon = $plugin->po }
+    my $file_type = $plugin_config->{file_type} // 'po';
+    $lexicon = $plugin->$file_type;
     $lexicon->logger($logger);
 
     # Add "lexicon" helper
@@ -33,7 +33,7 @@ sub register {
             my ( $app, $conf ) = @_;
 
             # Default: utf8 flaged
-            $conf->{decode} = 1 unless defined $conf->{decode};
+            $conf->{decode} = $conf->{decode} // 1;
             $lexicon->lexicon_ref($conf);
         }
     );
