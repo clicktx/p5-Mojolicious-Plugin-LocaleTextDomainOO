@@ -4,3 +4,7 @@ requires 'Locale::TextDomain::OO', '1.023';
 on build => sub {
     requires 'ExtUtils::MakeMaker';
 };
+
+on test => sub {
+    requires 'Test::More';
+};
