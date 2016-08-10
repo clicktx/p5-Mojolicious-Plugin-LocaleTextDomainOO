@@ -48,7 +48,13 @@
       "runtime" : {
          "requires" : {
             "Locale::TextDomain::OO" : "1.023",
-            "Mojolicious" : "6.64"
+            "Mojolicious" : "6.64",
+            "Safe" : "2.23"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Test::More" : "0"
          }
       }
    },
