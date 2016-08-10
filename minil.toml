@@ -1,5 +1,5 @@
 name = "Mojolicious-Plugin-LocaleTextDomainOO"
-# badges = ["travis"]
+badges=['travis', 'coveralls']
 module_maker="ModuleBuildTiny"
 
 [release]
