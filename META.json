@@ -4,7 +4,7 @@
       "Munenori Sugimura <clicktx@gmail.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v3.0.2, CPAN::Meta::Converter version 2.150005",
+   "generated_by" : "Minilla/v3.0.2, CPAN::Meta::Converter version 2.143240",
    "license" : [
       "unknown"
    ],
@@ -64,6 +64,5 @@
          "web" : "https://github.com/clicktx/p5-Mojolicious-Plugin-LocaleTextDomainOO"
       }
    },
-   "version" : "0.01",
-   "x_serialization_backend" : "JSON::PP version 2.27300"
+   "version" : "0.01"
 }
