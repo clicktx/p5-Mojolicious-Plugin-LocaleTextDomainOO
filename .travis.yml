@@ -8,11 +8,8 @@ cache:
     directories:
         - local
 before_install:
-    - cpanm -n Devel::Cover::Report::Coveralls
     - cpanm Carton
 install:
     - carton install
 script:
-    - HARNESS_PERL_SWITCHES="-MDevel::Cover=+ignore,^local/|^t/" carton exec prove -lrv t
-after_success:
-    - carton exec -- cover -report coveralls
+    - carton exec prove -lrv t

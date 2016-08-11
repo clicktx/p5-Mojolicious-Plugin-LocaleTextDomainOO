@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/clicktx/p5-Mojolicious-Plugin-LocaleTextDomainOO.svg?branch=master)](https://travis-ci.org/clicktx/p5-Mojolicious-Plugin-LocaleTextDomainOO) [![Coverage Status](https://img.shields.io/coveralls/clicktx/p5-Mojolicious-Plugin-LocaleTextDomainOO/master.svg?style=flat)](https://coveralls.io/r/clicktx/p5-Mojolicious-Plugin-LocaleTextDomainOO?branch=master)
+[![Build Status](https://travis-ci.org/clicktx/p5-Mojolicious-Plugin-LocaleTextDomainOO.svg?branch=master)](https://travis-ci.org/clicktx/p5-Mojolicious-Plugin-LocaleTextDomainOO)
 # NAME
 
 Mojolicious::Plugin::LocaleTextDomainOO - Mojolicious Plugin
