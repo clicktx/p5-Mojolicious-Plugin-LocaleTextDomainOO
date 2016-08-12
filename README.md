@@ -99,13 +99,49 @@ Set or Get language.
 
 ## `__, __x, __n, __nx`
 
+    # In controller
+    app->__('hello');
+    app->__x('hello, {name}', name => 'World');
+
+    # In template
+    <%= __ 'hello' %>
+    <%= __x 'hello, {name}', name => 'World' %>
+
+See [Locale::TextDomain::OO::Plugin::Expand::Gettext](https://metacpan.org/pod/Locale::TextDomain::OO::Plugin::Expand::Gettext)
+
 ## `__p, __px, __np, __npx`
+
+    # In controller
+    app->__p(
+        'time',  # Context (msgctxt)
+        'hello'
+    );
+
+    # In template
+    <%= __p 'time', 'hello' %>
+
+See [Locale::TextDomain::OO::Plugin::Expand::Gettext](https://metacpan.org/pod/Locale::TextDomain::OO::Plugin::Expand::Gettext)
 
 ## `N__, N__x, N__n, N__nx, N__p, N__px, N__np, N__npx`
 
+See [Locale::TextDomain::OO::Plugin::Expand::Gettext](https://metacpan.org/pod/Locale::TextDomain::OO::Plugin::Expand::Gettext)
+
 ## `__begin_d, __end_d, __d, __dn, __dp, __dnp, __dx, __dnx, __dpx, __dnpx`
 
+    # In controller
+    app->__d(
+        'domain',  # Text Domain
+        'hello'
+    );
+
+    # In template
+    <%= __d 'domain', 'hello' %>
+
+See [Locale::TextDomain::OO::Plugin::Expand::Gettext::DomainAndCategory](https://metacpan.org/pod/Locale::TextDomain::OO::Plugin::Expand::Gettext::DomainAndCategory)
+
 ## `N__d, N__dn, N__dp, N__dnp, N__dx, N__dnx, N__dpx, N__dnpx`
+
+See [Locale::TextDomain::OO::Plugin::Expand::Gettext::DomainAndCategory](https://metacpan.org/pod/Locale::TextDomain::OO::Plugin::Expand::Gettext::DomainAndCategory)
 
 # METHODS
 
@@ -133,3 +169,8 @@ Munenori Sugimura <clicktx@gmail.com>
 # SEE ALSO
 
 [Locale::TextDomain::OO](https://metacpan.org/pod/Locale::TextDomain::OO), [Mojolicious](https://metacpan.org/pod/Mojolicious), [Mojolicious::Guides](https://metacpan.org/pod/Mojolicious::Guides), [http://mojolicious.org](http://mojolicious.org).
+
+# LICENSE
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See [perlartistic](https://metacpan.org/pod/perlartistic).

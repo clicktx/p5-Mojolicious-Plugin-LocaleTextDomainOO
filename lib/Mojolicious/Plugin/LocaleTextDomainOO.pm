@@ -22,13 +22,14 @@ sub register {
     push @$plugins, @{ $plugin_config->{plugins} }
       if ( ref $plugin_config->{plugins} eq 'ARRAY' );
 
-    my $logger = sub {};
+    my $logger = sub { };
     $logger = sub {
         my ( $message, $arg_ref ) = @_;
         my $type = $arg_ref->{type} || 'debug';
         $app->log->$type($message);
         return;
-    } if DEBUG;
+      }
+      if DEBUG;
 
     my $lexicon;
     my $file_type = $plugin_config->{file_type} || 'po';
@@ -67,43 +68,10 @@ sub register {
     # Add helper from gettext methods
     my @methods = (
         qw/
-          __
-          __x
-          __n
-          __nx
-          __p
-          __px
-          __np
-          __npx
-
-          N__
-          N__x
-          N__n
-          N__nx
-          N__p
-          N__px
-          N__np
-          N__npx
-
-          __begin_d
-          __end_d
-          __d
-          __dn
-          __dp
-          __dnp
-          __dx
-          __dnx
-          __dpx
-          __dnpx
-
-          N__d
-          N__dn
-          N__dp
-          N__dnp
-          N__dx
-          N__dnx
-          N__dpx
-          N__dnpx
+          __  __x  __n  __nx  __p  __px  __np  __npx
+          N__  N__x  N__n  N__nx  N__p  N__px  N__np  N__npx
+          __begin_d  __end_d  __d  __dn  __dp  __dnp  __dx  __dnx  __dpx  __dnpx
+          N__d  N__dn  N__dp  N__dnp  N__dx  N__dnx  N__dpx  N__dnpx
           /
     );
 
