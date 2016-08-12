@@ -35,15 +35,6 @@ sub register {
     $lexicon = $plugin->$file_type;
     $lexicon->logger($logger);
 
-    # Add "lexicon" helper
-    $app->helper(
-        lexicon => sub {
-            my ( $app, $conf ) = @_;
-            $conf->{decode} = $conf->{decode} // 1;    # Default: utf8 flaged
-            $lexicon->lexicon_ref($conf);
-        }
-    );
-
     # Add "locale" helper
     $app->helper(
         locale => sub {
@@ -56,16 +47,21 @@ sub register {
         }
     );
 
+    # Add "lexicon" helper
+    $app->helper(
+        lexicon => sub {
+            my ( $app, $conf ) = @_;
+            $conf->{decode} = $conf->{decode} // 1;    # Default: utf8 flaged
+            $lexicon->lexicon_ref($conf);
+        }
+    );
+
     # Add "language" helper
     $app->helper(
         language => sub {
             my ( $self, $lang ) = @_;
-            if ($lang) {
-                $self->locale->language($lang);
-            }
-            else {
-                return $self->locale->language;
-            }
+            if   ($lang) { $self->locale->language($lang) }
+            else         { $self->locale->language }
         }
     );
 
