@@ -10,8 +10,16 @@ our $VERSION = '0.01';
 has 'po' => sub { Locale::TextDomain::OO::Lexicon::File::PO->new };
 has 'mo' => sub { Locale::TextDomain::OO::Lexicon::File::MO->new };
 
+my $plugins_default = [qw/Expand::Gettext::DomainAndCategory/];
+
 sub register {
     my ( $plugin, $app, $plugin_config ) = @_;
+
+    # Initialize
+    my $language = $plugin_config->{default_language} // 'en';
+    my $plugins = $plugins_default;
+    push @$plugins, @{ $plugin_config->{plugins} }
+      if ( ref $plugin_config->{plugins} eq 'ARRAY' );
 
     my $logger = sub {
         my ( $message, $arg_ref ) = @_;
@@ -31,9 +39,7 @@ sub register {
     $app->helper(
         lexicon => sub {
             my ( $app, $conf ) = @_;
-
-            # Default: utf8 flaged
-            $conf->{decode} = $conf->{decode} // 1;
+            $conf->{decode} = $conf->{decode} // 1;    # Default: utf8 flaged
             $lexicon->lexicon_ref($conf);
         }
     );
@@ -42,11 +48,6 @@ sub register {
     $app->helper(
         locale => sub {
             my ($self) = @_;
-            my $plugins = [qw/Expand::Gettext::DomainAndCategory/];
-            push @$plugins, @{ $plugin_config->{plugins} }
-              if ( ref $plugin_config->{plugins} eq 'ARRAY' );
-            my $language = $plugin_config->{default_language} // 'en';
-
             Locale::TextDomain::OO->instance(
                 plugins  => $plugins,
                 language => $language,
