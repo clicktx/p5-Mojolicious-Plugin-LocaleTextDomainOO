@@ -18,7 +18,7 @@ Mojolicious::Plugin::LocaleTextDomainOO - I18N(GNU getext) for Mojolicious.
         $self->plugin('LocaleTextDomainOO',
           {
               file_type => 'po',              # or 'mo'. default: po
-              default_language => 'ja',       # default en
+              default => 'ja',       # default en
               plugins => [                    # more Locale::TextDomain::OO plugins.
                   qw/ +Your::Special::Plugin  # default Expand::Gettext::DomainAndCategory plugin onry.
               /],
@@ -52,9 +52,9 @@ But, [Locale::MakeText](https://metacpan.org/pod/Locale::MakeText) is not using 
 
 Gettext lexicon File type. default to `po`.
 
-## `default_language`
+## `default`
 
-    plugin LocaleTextDomainOO => { default_language => 'ja' };
+    plugin LocaleTextDomainOO => { default => 'ja' };
 
 Default language. default to `en`.
 

@@ -18,7 +18,7 @@ sub register {
 
     # Initialize
     my $file_type = $plugin_config->{file_type} || 'po';
-    my $language = $plugin_config->{default_language} || 'en';
+    my $default = $plugin_config->{default} || 'en';
     my $plugins = $plugins_default;
     push @$plugins, @{ $plugin_config->{plugins} }
       if ( ref $plugin_config->{plugins} eq 'ARRAY' );
@@ -36,7 +36,7 @@ sub register {
     my $loc = sub {
         Locale::TextDomain::OO->instance(
             plugins  => $plugins,
-            language => $language,
+            language => $default,
             logger   => $logger,
         );
     };
@@ -102,7 +102,7 @@ Mojolicious::Plugin::LocaleTextDomainOO - I18N(GNU getext) for Mojolicious.
       $self->plugin('LocaleTextDomainOO',
         {
             file_type => 'po',              # or 'mo'. default: po
-            default_language => 'ja',       # default en
+            default => 'ja',       # default en
             plugins => [                    # more Locale::TextDomain::OO plugins.
                 qw/ +Your::Special::Plugin  # default Expand::Gettext::DomainAndCategory plugin onry.
             /],
@@ -136,9 +136,9 @@ But, L<Locale::MakeText> is not using "text domain"...
 
 Gettext lexicon File type. default to C<po>.
 
-=head2 C<default_language>
+=head2 C<default>
 
-    plugin LocaleTextDomainOO => { default_language => 'ja' };
+    plugin LocaleTextDomainOO => { default => 'ja' };
 
 Default language. default to C<en>.
 

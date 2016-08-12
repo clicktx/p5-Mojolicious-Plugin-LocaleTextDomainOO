@@ -10,7 +10,7 @@ use utf8;
 plugin 'LocaleTextDomainOO',
   {
     file_type        => 'mo',
-    default_language => 'ja',
+    default => 'ja',
   };
 
 my $locale_dir = File::Spec->catdir( dirname(__FILE__), 'locale' );
