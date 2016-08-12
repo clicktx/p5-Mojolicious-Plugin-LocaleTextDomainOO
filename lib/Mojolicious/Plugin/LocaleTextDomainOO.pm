@@ -129,30 +129,34 @@ Mojolicious::Plugin::LocaleTextDomainOO - I18N(GNU getext) for Mojolicious.
   plugin 'LocaleTextDomainOO';
 
 
-Plugin configuration
+=head2 Plugin configuration
 
-  # your app in startup
-  $self->plugin('LocaleTextDomainOO',
-    {
-        file_type => 'po',              # or 'mo'. default: po
-        default_language => 'ja',       # default en
-        plugins => [                    # more Locale::TextDomain::OO plugins.
-            qw/ +Your::Special::Plugin  # default Expand::Gettext::DomainAndCategory plugin onry.
-        /],
-    }
-  );
+  # your app in startup method
+  sub startup {
+      $self->plugin('LocaleTextDomainOO',
+        {
+            file_type => 'po',              # or 'mo'. default: po
+            default_language => 'ja',       # default en
+            plugins => [                    # more Locale::TextDomain::OO plugins.
+                qw/ +Your::Special::Plugin  # default Expand::Gettext::DomainAndCategory plugin onry.
+            /],
+        }
+      );
 
-  $self->lexicon(
-      {
-          search_dirs => [qw(/path/my_app/locale)],
-          gettext_to_maketext => $boolean,              # option
-          decode => $boolean,                           # option
-          data   => [ '*::' => '*.po' ],
-      }
-  );
+      $self->lexicon(
+          {
+              search_dirs => [qw(/path/my_app/locale)],
+              gettext_to_maketext => $boolean,              # option
+              decode => $boolean,                           # option
+              data   => [ '*::' => '*.po' ],
+          }
+      );
+    ...
+  }
 
 =head1 DESCRIPTION
 
+L<Locale::TextDomain::OO> is a I18N tool of perl OO interface.
 L<Mojolicious::Plugin::LocaleTextDomainOO> is internationalization  plugin for L<Mojolicious>.
 
 This module is similar to L<Mojolicious::Plugin::I18N>.
@@ -160,20 +164,36 @@ But, L<Locale::MakeText> is not using "text domain"...
 
 =head1 OPTIONS
 
+=head2 C<file_type>
+
+    plugin LocaleTextDomainOO => { file_type => 'po' };
+
+Gettext lexicon File type. default to C<po>.
+
+=head2 C<default_language>
+
+    plugin LocaleTextDomainOO => { default_language => 'ja' };
+
+Default language. default to C<en>.
+
+=head2 C<plugins>
+
+    plugin LocaleTextDomainOO => { plugins => [ qw /Your::LocaleTextDomainOO::Plugin/ ] };
+
+Add plugin. default to C<Expand::Gettext::DomainAndCategory> plugin onry.
+
 =head1 HELPERS
 
-=over
-
-=item * C<locale>
+=head2 C<locale>
 
     # Mojolicious Lite
     my $loc = app->locale;
 
 Returned Locale::TextDomain::OO object.
 
-=item * C<lexicon>
+=head2 C<lexicon>
 
-    $self->lexicon(
+    app->lexicon(
         {
             search_dirs => [qw(your/my_app/locale)],
             gettext_to_maketext => $boolean,
@@ -186,26 +206,25 @@ Returned Locale::TextDomain::OO object.
     );
 
 Gettext '*.po' or '*.mo' file as lexicon.
-See Also L<Locale::TextDomain::OO::Lexicon::File::PO> L<Locale::TextDomain::OO::Lexicon::File::MO>
+See L<Locale::TextDomain::OO::Lexicon::File::PO> L<Locale::TextDomain::OO::Lexicon::File::MO>
 
-=item * C<language>
+=head2 C<language>
 
     app->language('ja');
     my $language = app->language;
 
 Set or Get language.
 
-=item * __, __x, __n, __nx
+=head2 C<__, __x, __n, __nx>
 
-=item * __p, __px, __np, __npx
+=head2 C<__p, __px, __np, __npx>
 
-=item * N__, N__x, N__n, N__nx, N__p, N__px, N__np, N__npx
+=head2 C<N__, N__x, N__n, N__nx, N__p, N__px, N__np, N__npx>
 
-=item * __begin_d, __end_d, __d, __dn, __dp, __dnp, __dx, __dnx, __dpx, __dnpx
+=head2 C<__begin_d, __end_d, __d, __dn, __dp, __dnp, __dx, __dnx, __dpx, __dnpx>
 
-=item * N__d, N__dn, N__dp, N__dnp, N__dx, N__dnx, N__dpx, N__dnpx
+=head2 C<N__d, N__dn, N__dp, N__dnp, N__dx, N__dnx, N__dpx, N__dnpx>
 
-=back
 
 =head1 METHODS
 
@@ -224,6 +243,6 @@ Munenori Sugimura <clicktx@gmail.com>
 
 =head1 SEE ALSO
 
-L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojolicious.org>.
+L<Locale::TextDomain::OO>, L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojolicious.org>.
 
 =cut
