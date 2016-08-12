@@ -123,7 +123,7 @@ __END__
 
 =head1 NAME
 
-Mojolicious::Plugin::LocaleTextDomainOO - Mojolicious Plugin
+Mojolicious::Plugin::LocaleTextDomainOO - I18N(GNU getext) for Mojolicious.
 
 =head1 SYNOPSIS
 
@@ -146,42 +146,71 @@ Plugin configuration
         /],
     }
   );
-  
+
   $self->lexicon(
       {
-          search_dirs => [qw(your/my_app/locale)],
-          # gettext_to_maketext => $boolean,
-          decode => 1,
+          search_dirs => [qw(/path/my_app/locale)],
+          gettext_to_maketext => $boolean,              # option
+          decode => $boolean,                           # option
           data   => [ '*::' => '*.po' ],
       }
   );
 
 =head1 DESCRIPTION
 
-L<Mojolicious::Plugin::LocaleTextDomainOO> is a L<Mojolicious> plugin.
+L<Mojolicious::Plugin::LocaleTextDomainOO> is internationalization  plugin for L<Mojolicious>.
+
+This module is similar to L<Mojolicious::Plugin::I18N>.
+But, L<Locale::MakeText> is not using "text domain"...
 
 =head1 OPTIONS
 
 =head1 HELPERS
 
-=head2 C<lexicon>
+=over
 
-  $self->lexicon(
-      {
-          search_dirs => [qw(your/my_app/locale)],
-          gettext_to_maketext => $boolean,
-          decode => $boolean,
-          data   => [
-              '*::' => '*.po',
-              '*:CATEGORY:DOMAIN' => '*/test.po',
-          ],
-      }
-  );
+=item * C<locale>
 
-Gettext po or mo file as lexicon.
-Locale::TextDomain::OO::Lexicon::File::(PO/MO) object.
-L<Locale::TextDomain::OO::Lexicon::File::PO>
-L<Locale::TextDomain::OO::Lexicon::File::MO>
+    # Mojolicious Lite
+    my $loc = app->locale;
+
+Returned Locale::TextDomain::OO object.
+
+=item * C<lexicon>
+
+    $self->lexicon(
+        {
+            search_dirs => [qw(your/my_app/locale)],
+            gettext_to_maketext => $boolean,
+            decode => $boolean,                         # default true. *** utf8 flaged ***
+            data   => [
+                '*::' => '*.po',
+                '*:CATEGORY:DOMAIN' => '*/test.po',
+            ],
+        }
+    );
+
+Gettext '*.po' or '*.mo' file as lexicon.
+See Also L<Locale::TextDomain::OO::Lexicon::File::PO> L<Locale::TextDomain::OO::Lexicon::File::MO>
+
+=item * C<language>
+
+    app->language('ja');
+    my $language = app->language;
+
+Set or Get language.
+
+=item * __, __x, __n, __nx
+
+=item * __p, __px, __np, __npx
+
+=item * N__, N__x, N__n, N__nx, N__p, N__px, N__np, N__npx
+
+=item * __begin_d, __end_d, __d, __dn, __dp, __dnp, __dx, __dnx, __dpx, __dnpx
+
+=item * N__d, N__dn, N__dp, N__dnp, N__dx, N__dnx, N__dpx, N__dnpx
+
+=back
 
 =head1 METHODS
 
