@@ -4,6 +4,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 use Locale::TextDomain::OO;
 use Locale::TextDomain::OO::Lexicon::File::PO;
 use Locale::TextDomain::OO::Lexicon::File::MO;
+use constant DEBUG => $ENV{MOJO_I18N_DEBUG} || 0;
 
 our $VERSION = '0.01';
 
@@ -21,17 +22,17 @@ sub register {
     push @$plugins, @{ $plugin_config->{plugins} }
       if ( ref $plugin_config->{plugins} eq 'ARRAY' );
 
-    my $logger = sub {
+    my $logger = sub {};
+    $logger = sub {
         my ( $message, $arg_ref ) = @_;
         my $type = $arg_ref->{type} || 'debug';
         $app->log->$type($message);
         return;
-    };
+    } if DEBUG;
 
     my $lexicon;
     my $file_type = $plugin_config->{file_type} || 'po';
     $lexicon = $plugin->$file_type;
-    $lexicon->logger($logger);
 
     # Add "locale" helper
     $app->helper(
@@ -236,6 +237,14 @@ L<Mojolicious::Plugin> and implements the following new ones.
   $plugin->register(Mojolicious->new);
 
 Register plugin in L<Mojolicious> application.
+
+=head1 DEBUG MODE
+
+    # debug mode on
+    BEGIN { $ENV{MOJO_I18N_DEBUG} = 1 }
+
+    # or
+    MOJO_I18N_DEBUG=1 perl script.pl
 
 =head1 AUTHOR
 
