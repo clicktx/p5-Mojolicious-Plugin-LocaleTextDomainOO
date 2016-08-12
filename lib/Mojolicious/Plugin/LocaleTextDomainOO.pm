@@ -23,10 +23,8 @@ sub register {
 
     my $logger = sub {
         my ( $message, $arg_ref ) = @_;
-        my $type = $arg_ref->{type};
-
-        # $app->log->$type($message);
-        $app->log->debug($message);
+        my $type = $arg_ref->{type} // 'debug';
+        $app->log->$type($message);
         return;
     };
 
