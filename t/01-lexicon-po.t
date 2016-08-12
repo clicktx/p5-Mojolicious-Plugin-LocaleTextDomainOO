@@ -17,8 +17,6 @@ my $locale_dir = File::Spec->catdir( dirname(__FILE__), 'locale' );
 app->lexicon(
     {
         search_dirs => [$locale_dir],
-
-        # gettext_to_maketext => $boolean,
         decode => 1,
         data   => [
             '*::'           => '*.po',
