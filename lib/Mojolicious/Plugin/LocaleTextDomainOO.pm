@@ -17,6 +17,7 @@ sub register {
     my ( $plugin, $app, $plugin_config ) = @_;
 
     # Initialize
+    my $file_type = $plugin_config->{file_type} || 'po';
     my $language = $plugin_config->{default_language} || 'en';
     my $plugins = $plugins_default;
     push @$plugins, @{ $plugin_config->{plugins} }
@@ -31,28 +32,24 @@ sub register {
       }
       if DEBUG;
 
-    my $lexicon;
-    my $file_type = $plugin_config->{file_type} || 'po';
-    $lexicon = $plugin->$file_type;
+    # Default Handler
+    my $loc = sub {
+        Locale::TextDomain::OO->instance(
+            plugins  => $plugins,
+            language => $language,
+            logger   => $logger,
+        );
+    };
 
     # Add "locale" helper
-    $app->helper(
-        locale => sub {
-            my ($self) = @_;
-            Locale::TextDomain::OO->instance(
-                plugins  => $plugins,
-                language => $language,
-                logger   => $logger,
-            );
-        }
-    );
+    $app->helper( locale => $loc );
 
     # Add "lexicon" helper
     $app->helper(
         lexicon => sub {
             my ( $app, $conf ) = @_;
             $conf->{decode} = $conf->{decode} // 1;    # Default: utf8 flaged
-            $lexicon->lexicon_ref($conf);
+            $plugin->$file_type->lexicon_ref($conf);
         }
     );
 
