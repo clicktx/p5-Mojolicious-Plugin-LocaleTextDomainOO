@@ -16,6 +16,9 @@ msgstr ""
 msgid "hello"
 msgstr "こんにちは"
 
+msgid "hello2"
+msgstr "こんにちは２"
+
 msgctxt "ctxt"
 msgid "hello"
 msgstr "こんにちはmsgctxt"

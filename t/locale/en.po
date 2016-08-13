@@ -16,5 +16,8 @@ msgstr ""
 msgid "hello"
 msgstr "hello"
 
+msgid "hello2"
+msgstr "Hello two"
+
 msgid "hello, {name}"
 msgstr "Hello, {name}!"

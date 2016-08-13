@@ -4,6 +4,9 @@ use Mojo::Base 'Mojolicious::Plugin';
 use Locale::TextDomain::OO;
 use Locale::TextDomain::OO::Lexicon::File::PO;
 use Locale::TextDomain::OO::Lexicon::File::MO;
+use I18N::LangTags;
+use I18N::LangTags::Detect;
+
 use constant DEBUG => $ENV{MOJO_I18N_DEBUG} || 0;
 
 our $VERSION = '0.01';
@@ -11,14 +14,23 @@ our $VERSION = '0.01';
 has 'po' => sub { Locale::TextDomain::OO::Lexicon::File::PO->new };
 has 'mo' => sub { Locale::TextDomain::OO::Lexicon::File::MO->new };
 
-my $plugins_default = [qw/Expand::Gettext::DomainAndCategory/];
+my $plugins_default = [
+    qw/
+      Expand::Gettext::DomainAndCategory
+      Language::LanguageOfLanguages
+      /
+];
 
 sub register {
     my ( $plugin, $app, $plugin_config ) = @_;
 
     # Initialize
     my $file_type = $plugin_config->{file_type} || 'po';
-    my $default = $plugin_config->{default} || 'en';
+    my $default   = $plugin_config->{default}   || 'en';
+    $default =~ tr/-A-Z/_a-z/;
+    $default =~ tr/_a-z0-9//cd;
+    my $languages = $plugin_config->{languages} // [$default];
+
     my $plugins = $plugins_default;
     push @$plugins, @{ $plugin_config->{plugins} }
       if ( ref $plugin_config->{plugins} eq 'ARRAY' );
@@ -35,11 +47,14 @@ sub register {
     # Default Handler
     my $loc = sub {
         Locale::TextDomain::OO->instance(
-            plugins  => $plugins,
-            language => $default,
-            logger   => $logger,
+            plugins   => $plugins,
+            languages => $languages,
+            logger    => $logger,
         );
     };
+
+    # Add hook
+    $Mojolicious::Plugin::I18N::code->( $app, $plugin_config );
 
     # Add "locale" helper
     $app->helper( locale => $loc );
@@ -53,12 +68,21 @@ sub register {
         }
     );
 
+    # Add "languages" helper
+    $app->helper(
+        languages => sub {
+            my ( $self, @languages ) = @_;
+            unless (@languages) { $self->locale->languages }
+            else                { $self->locale->languages( \@languages ) }
+        }
+    );
+
     # Add "language" helper
     $app->helper(
         language => sub {
-            my ( $self, $lang ) = @_;
-            if   ($lang) { $self->locale->language($lang) }
-            else         { $self->locale->language }
+            my ( $self, $language ) = @_;
+            unless ($language) { $self->locale->language }
+            else               { $self->locale->language($language) }
         }
     );
 
@@ -76,6 +100,123 @@ sub register {
         $app->helper( $method => sub { shift->app->locale->$method(@_) } );
     }
 }
+
+#######################################################################
+###  This code is Mojolicious::Plugin::I18N
+#######################################################################
+package Mojolicious::Plugin::I18N;
+
+our $code = sub {
+    my ( $app, $conf ) = @_;
+
+    my $langs   = $conf->{support_url_langs};
+    my $hosts   = $conf->{support_hosts};
+    my $default = $conf->{default} || 'en';
+    $default =~ tr/-A-Z/_a-z/;
+    $default =~ tr/_a-z0-9//cd;
+
+    # Add hook
+    $app->hook(
+        before_dispatch => sub {
+            my $self = shift;
+
+            # Header detection
+            my @languages =
+              $conf->{no_header_detect}
+              ? ()
+              : I18N::LangTags::implicate_supers(
+                I18N::LangTags::Detect->http_accept_langs(
+                    $self->req->headers->accept_language
+                )
+              );
+
+            # Host detection
+            my $host = $self->req->headers->header('X-Host')
+              || $self->req->headers->host;
+            if ( $conf->{support_hosts} && $host ) {
+                warn $host;
+                $host =~ s/^www\.//;    # hack
+                if ( my $lang = $conf->{support_hosts}->{$host} ) {
+                    $self->app->log->debug(
+                        "Found language $lang, Host header is $host");
+
+                    unshift @languages, $lang;
+                }
+            }
+
+            # Set default language
+            $self->stash( lang_default => $languages[0] ) if $languages[0];
+
+            # URL detection
+            if ( my $path = $self->req->url->path ) {
+                my $part = $path->parts->[0];
+
+                if ( $part && $langs && grep { $part eq $_ } @$langs ) {
+
+                    # Ignore static files
+                    return if $self->res->code;
+
+                    $self->app->log->debug("Found language $part in URL $path");
+
+                    unshift @languages, $part;
+
+                    # Save lang in stash
+                    $self->stash( lang => $part );
+
+                    # Clean path
+                    shift @{ $path->parts };
+                    $path->trailing_slash(0);
+                }
+            }
+
+            # Languages
+            $self->languages( @languages, $default );
+        }
+    );
+
+    # Reimplement "url_for" helper
+    my $mojo_url_for = *Mojolicious::Controller::url_for{CODE};
+
+    my $i18n_url_for = sub {
+        my $self = shift;
+        my $url  = $self->$mojo_url_for(@_);
+
+        # Absolute URL
+        return $url if $url->is_abs;
+
+        # Discard target if present
+        shift if ( @_ % 2 && !ref $_[0] ) || ( @_ > 1 && ref $_[-1] );
+
+        # Unveil params
+        my %params = @_ == 1 ? %{ $_[0] } : @_;
+
+        # Detect lang
+        if ( my $lang = $params{lang} || $self->stash('lang') ) {
+            my $path = $url->path || [];
+
+            # Root
+            if ( !$path->[0] ) {
+                $path->parts( [$lang] );
+            }
+
+            # No language detected
+            elsif ( ref $langs ne 'ARRAY'
+                or not scalar grep { $path->contains("/$_") } @$langs )
+            {
+                unshift @{ $path->parts }, $lang;
+            }
+        }
+
+        $url;
+    };
+
+    {
+        no strict 'refs';
+        no warnings 'redefine';
+
+        *Mojolicious::Controller::url_for = $i18n_url_for;
+    }
+};
 
 1;
 __END__
@@ -99,16 +240,24 @@ Mojolicious::Plugin::LocaleTextDomainOO - I18N(GNU getext) for Mojolicious.
 
   # your app in startup method
   sub startup {
+      # setup plugin
       $self->plugin('LocaleTextDomainOO',
         {
             file_type => 'po',              # or 'mo'. default: po
-            default => 'ja',       # default en
+            default => 'ja',                # default en
             plugins => [                    # more Locale::TextDomain::OO plugins.
                 qw/ +Your::Special::Plugin  # default Expand::Gettext::DomainAndCategory plugin onry.
             /],
+            languages => [ qw( en-US en ja-JP ja de-DE de ) ],
+
+            # Mojolicious::Plugin::I18N like options
+            no_header_detect => 1,
+            support_url_langs => [ qw( en ja de ) ],
+            support_hosts => { 'mojolicious.ru' => 'ru', 'mojolicio.us' => 'en' }
         }
       );
 
+      # loading lexicon files
       $self->lexicon(
           {
               search_dirs => [qw(/path/my_app/locale)],
@@ -142,11 +291,35 @@ Gettext lexicon File type. default to C<po>.
 
 Default language. default to C<en>.
 
+=head2 C<languages>
+
+    plugin LocaleTextDomainOO => { languages => [ 'en-US', 'en', 'ja-JP', 'ja' ] };
+
 =head2 C<plugins>
 
     plugin LocaleTextDomainOO => { plugins => [ qw /Your::LocaleTextDomainOO::Plugin/ ] };
 
-Add plugin. default to C<Expand::Gettext::DomainAndCategory> plugin onry.
+Add plugin. default using L<Locale::TextDomain::OO::Plugin::Expand::Gettext::DomainAndCategory>
+and L<Locale::TextDomain::OO::Plugin::Language::LanguageOfLanguages> plugin onry.
+
+=head2 C<support_url_langs>
+
+    plugin LocaleTextDomainOO => { support_url_langs => [ 'en', 'ja', 'de' ] };
+
+Detect language from URL. see L<Mojolicious::Plugin::I18N> option.
+
+=head2 C<support_hosts>
+
+    plugin LocaleTextDomainOO => { support_hosts => { 'mojolicious.ru' => 'ru', 'mojolicio.us' => 'en' } };
+
+Detect Host header and use language for that host. see L<Mojolicious::Plugin::I18N> option.
+
+=head2 C<no_header_detect>
+
+    plugin LocaleTextDomainOO => { no_header_detect => 1 };
+
+Off header detect. see L<Mojolicious::Plugin::I18N> option.
+
 
 =head1 HELPERS
 
@@ -258,5 +431,12 @@ L<Locale::TextDomain::OO>, L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojo
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
+
+=head1 LICENSE of Mojolicious::Plugin::I18N
+
+Mojolicious::Plugin::LocaleTextDomainOO uses Mojolicious::Plugin::I18N code. Here is LICENSE of Mojolicious::Plugin::I18N
+
+This program is free software, you can redistribute it and/or modify it under the terms of the Artistic License version 2.0.
+
 
 =cut
