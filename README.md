@@ -15,16 +15,24 @@ Mojolicious::Plugin::LocaleTextDomainOO - I18N(GNU getext) for Mojolicious.
 
     # your app in startup method
     sub startup {
+        # setup plugin
         $self->plugin('LocaleTextDomainOO',
           {
               file_type => 'po',              # or 'mo'. default: po
-              default => 'ja',       # default en
+              default => 'ja',                # default en
               plugins => [                    # more Locale::TextDomain::OO plugins.
                   qw/ +Your::Special::Plugin  # default Expand::Gettext::DomainAndCategory plugin onry.
               /],
+              languages => [ qw( en-US en ja-JP ja de-DE de ) ],
+
+              # Mojolicious::Plugin::I18N like options
+              no_header_detect => 1,
+              support_url_langs => [ qw( en ja de ) ],
+              support_hosts => { 'mojolicious.ru' => 'ru', 'mojolicio.us' => 'en' }
           }
         );
 
+        # loading lexicon files
         $self->lexicon(
             {
                 search_dirs => [qw(/path/my_app/locale)],
@@ -58,11 +66,34 @@ Gettext lexicon File type. default to `po`.
 
 Default language. default to `en`.
 
+## `languages`
+
+    plugin LocaleTextDomainOO => { languages => [ 'en-US', 'en', 'ja-JP', 'ja' ] };
+
 ## `plugins`
 
     plugin LocaleTextDomainOO => { plugins => [ qw /Your::LocaleTextDomainOO::Plugin/ ] };
 
-Add plugin. default to `Expand::Gettext::DomainAndCategory` plugin onry.
+Add plugin. default using [Locale::TextDomain::OO::Plugin::Expand::Gettext::DomainAndCategory](https://metacpan.org/pod/Locale::TextDomain::OO::Plugin::Expand::Gettext::DomainAndCategory)
+and [Locale::TextDomain::OO::Plugin::Language::LanguageOfLanguages](https://metacpan.org/pod/Locale::TextDomain::OO::Plugin::Language::LanguageOfLanguages) plugin onry.
+
+## `support_url_langs`
+
+    plugin LocaleTextDomainOO => { support_url_langs => [ 'en', 'ja', 'de' ] };
+
+Detect language from URL. see [Mojolicious::Plugin::I18N](https://metacpan.org/pod/Mojolicious::Plugin::I18N) option.
+
+## `support_hosts`
+
+    plugin LocaleTextDomainOO => { support_hosts => { 'mojolicious.ru' => 'ru', 'mojolicio.us' => 'en' } };
+
+Detect Host header and use language for that host. see [Mojolicious::Plugin::I18N](https://metacpan.org/pod/Mojolicious::Plugin::I18N) option.
+
+## `no_header_detect`
+
+    plugin LocaleTextDomainOO => { no_header_detect => 1 };
+
+Off header detect. see [Mojolicious::Plugin::I18N](https://metacpan.org/pod/Mojolicious::Plugin::I18N) option.
 
 # HELPERS
 
@@ -174,3 +205,9 @@ Munenori Sugimura <clicktx@gmail.com>
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See [perlartistic](https://metacpan.org/pod/perlartistic).
+
+# LICENSE of Mojolicious::Plugin::I18N
+
+Mojolicious::Plugin::LocaleTextDomainOO uses Mojolicious::Plugin::I18N code. Here is LICENSE of Mojolicious::Plugin::I18N
+
+This program is free software, you can redistribute it and/or modify it under the terms of the Artistic License version 2.0.

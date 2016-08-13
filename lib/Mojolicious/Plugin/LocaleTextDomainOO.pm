@@ -47,9 +47,9 @@ sub register {
     # Default Handler
     my $loc = sub {
         Locale::TextDomain::OO->instance(
-            plugins  => $plugins,
+            plugins   => $plugins,
             languages => $languages,
-            logger   => $logger,
+            logger    => $logger,
         );
     };
 
@@ -73,7 +73,7 @@ sub register {
         languages => sub {
             my ( $self, @languages ) = @_;
             unless (@languages) { $self->locale->languages }
-            else { $self->locale->languages(\@languages) }
+            else                { $self->locale->languages( \@languages ) }
         }
     );
 
@@ -82,7 +82,7 @@ sub register {
         language => sub {
             my ( $self, $language ) = @_;
             unless ($language) { $self->locale->language }
-            else { $self->locale->language($language) }
+            else               { $self->locale->language($language) }
         }
     );
 
@@ -240,16 +240,24 @@ Mojolicious::Plugin::LocaleTextDomainOO - I18N(GNU getext) for Mojolicious.
 
   # your app in startup method
   sub startup {
+      # setup plugin
       $self->plugin('LocaleTextDomainOO',
         {
             file_type => 'po',              # or 'mo'. default: po
-            default => 'ja',       # default en
+            default => 'ja',                # default en
             plugins => [                    # more Locale::TextDomain::OO plugins.
                 qw/ +Your::Special::Plugin  # default Expand::Gettext::DomainAndCategory plugin onry.
             /],
+            languages => [ qw( en-US en ja-JP ja de-DE de ) ],
+
+            # Mojolicious::Plugin::I18N like options
+            no_header_detect => 1,
+            support_url_langs => [ qw( en ja de ) ],
+            support_hosts => { 'mojolicious.ru' => 'ru', 'mojolicio.us' => 'en' }
         }
       );
 
+      # loading lexicon files
       $self->lexicon(
           {
               search_dirs => [qw(/path/my_app/locale)],
@@ -283,11 +291,35 @@ Gettext lexicon File type. default to C<po>.
 
 Default language. default to C<en>.
 
+=head2 C<languages>
+
+    plugin LocaleTextDomainOO => { languages => [ 'en-US', 'en', 'ja-JP', 'ja' ] };
+
 =head2 C<plugins>
 
     plugin LocaleTextDomainOO => { plugins => [ qw /Your::LocaleTextDomainOO::Plugin/ ] };
 
-Add plugin. default to C<Expand::Gettext::DomainAndCategory> plugin onry.
+Add plugin. default using L<Locale::TextDomain::OO::Plugin::Expand::Gettext::DomainAndCategory>
+and L<Locale::TextDomain::OO::Plugin::Language::LanguageOfLanguages> plugin onry.
+
+=head2 C<support_url_langs>
+
+    plugin LocaleTextDomainOO => { support_url_langs => [ 'en', 'ja', 'de' ] };
+
+Detect language from URL. see L<Mojolicious::Plugin::I18N> option.
+
+=head2 C<support_hosts>
+
+    plugin LocaleTextDomainOO => { support_hosts => { 'mojolicious.ru' => 'ru', 'mojolicio.us' => 'en' } };
+
+Detect Host header and use language for that host. see L<Mojolicious::Plugin::I18N> option.
+
+=head2 C<no_header_detect>
+
+    plugin LocaleTextDomainOO => { no_header_detect => 1 };
+
+Off header detect. see L<Mojolicious::Plugin::I18N> option.
+
 
 =head1 HELPERS
 
@@ -399,5 +431,12 @@ L<Locale::TextDomain::OO>, L<Mojolicious>, L<Mojolicious::Guides>, L<http://mojo
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
+
+=head1 LICENSE of Mojolicious::Plugin::I18N
+
+Mojolicious::Plugin::LocaleTextDomainOO uses Mojolicious::Plugin::I18N code. Here is LICENSE of Mojolicious::Plugin::I18N
+
+This program is free software, you can redistribute it and/or modify it under the terms of the Artistic License version 2.0.
+
 
 =cut
