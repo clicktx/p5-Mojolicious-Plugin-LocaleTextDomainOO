@@ -14,7 +14,12 @@ our $VERSION = '0.01';
 has 'po' => sub { Locale::TextDomain::OO::Lexicon::File::PO->new };
 has 'mo' => sub { Locale::TextDomain::OO::Lexicon::File::MO->new };
 
-my $plugins_default = [qw/Expand::Gettext::DomainAndCategory/];
+my $plugins_default = [
+    qw/
+      Expand::Gettext::DomainAndCategory
+      Language::LanguageOfLanguages
+      /
+];
 
 sub register {
     my ( $plugin, $app, $plugin_config ) = @_;
@@ -24,6 +29,7 @@ sub register {
     my $default   = $plugin_config->{default}   || 'en';
     $default =~ tr/-A-Z/_a-z/;
     $default =~ tr/_a-z0-9//cd;
+    my $languages = $plugin_config->{languages} // [$default];
 
     my $plugins = $plugins_default;
     push @$plugins, @{ $plugin_config->{plugins} }
@@ -42,7 +48,7 @@ sub register {
     my $loc = sub {
         Locale::TextDomain::OO->instance(
             plugins  => $plugins,
-            language => $default,
+            languages => $languages,
             logger   => $logger,
         );
     };
@@ -62,12 +68,21 @@ sub register {
         }
     );
 
+    # Add "languages" helper
+    $app->helper(
+        languages => sub {
+            my ( $self, @languages ) = @_;
+            unless (@languages) { $self->locale->languages }
+            else { $self->locale->languages(\@languages) }
+        }
+    );
+
     # Add "language" helper
     $app->helper(
         language => sub {
-            my ( $self, $lang ) = @_;
-            if   ($lang) { $self->locale->language($lang) }
-            else         { $self->locale->language }
+            my ( $self, $language ) = @_;
+            unless ($language) { $self->locale->language }
+            else { $self->locale->language($language) }
         }
     );
 
@@ -85,7 +100,6 @@ sub register {
         $app->helper( $method => sub { shift->app->locale->$method(@_) } );
     }
 }
-
 
 #######################################################################
 ###  This code is Mojolicious::Plugin::I18N
@@ -156,7 +170,7 @@ our $code = sub {
             }
 
             # Languages
-            $self->language( @languages, $default );
+            $self->languages( @languages, $default );
         }
     );
 
