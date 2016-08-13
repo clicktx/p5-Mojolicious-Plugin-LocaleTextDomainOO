@@ -53,7 +53,7 @@ sub register {
         );
     };
 
-    # Add hook
+    # Add hook and replace url_for helper
     $Mojolicious::Plugin::I18N::code->( $app, $plugin_config );
 
     # Add "locale" helper
