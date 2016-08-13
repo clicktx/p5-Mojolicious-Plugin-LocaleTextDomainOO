@@ -4,6 +4,9 @@ use Mojo::Base 'Mojolicious::Plugin';
 use Locale::TextDomain::OO;
 use Locale::TextDomain::OO::Lexicon::File::PO;
 use Locale::TextDomain::OO::Lexicon::File::MO;
+use I18N::LangTags;
+use I18N::LangTags::Detect;
+
 use constant DEBUG => $ENV{MOJO_I18N_DEBUG} || 0;
 
 our $VERSION = '0.01';
@@ -21,9 +24,6 @@ sub register {
     my $default   = $plugin_config->{default}   || 'en';
     $default =~ tr/-A-Z/_a-z/;
     $default =~ tr/_a-z0-9//cd;
-
-    my $langs = $plugin_config->{support_url_langs};
-    my $hosts = $plugin_config->{support_hosts};
 
     my $plugins = $plugins_default;
     push @$plugins, @{ $plugin_config->{plugins} }
@@ -46,6 +46,9 @@ sub register {
             logger   => $logger,
         );
     };
+
+    # Add hook
+    $Mojolicious::Plugin::I18N::code->( $app, $plugin_config );
 
     # Add "locale" helper
     $app->helper( locale => $loc );
@@ -82,6 +85,124 @@ sub register {
         $app->helper( $method => sub { shift->app->locale->$method(@_) } );
     }
 }
+
+
+#######################################################################
+###  This code is Mojolicious::Plugin::I18N
+#######################################################################
+package Mojolicious::Plugin::I18N;
+
+our $code = sub {
+    my ( $app, $conf ) = @_;
+
+    my $langs   = $conf->{support_url_langs};
+    my $hosts   = $conf->{support_hosts};
+    my $default = $conf->{default} || 'en';
+    $default =~ tr/-A-Z/_a-z/;
+    $default =~ tr/_a-z0-9//cd;
+
+    # Add hook
+    $app->hook(
+        before_dispatch => sub {
+            my $self = shift;
+
+            # Header detection
+            my @languages =
+              $conf->{no_header_detect}
+              ? ()
+              : I18N::LangTags::implicate_supers(
+                I18N::LangTags::Detect->http_accept_langs(
+                    $self->req->headers->accept_language
+                )
+              );
+
+            # Host detection
+            my $host = $self->req->headers->header('X-Host')
+              || $self->req->headers->host;
+            if ( $conf->{support_hosts} && $host ) {
+                warn $host;
+                $host =~ s/^www\.//;    # hack
+                if ( my $lang = $conf->{support_hosts}->{$host} ) {
+                    $self->app->log->debug(
+                        "Found language $lang, Host header is $host");
+
+                    unshift @languages, $lang;
+                }
+            }
+
+            # Set default language
+            $self->stash( lang_default => $languages[0] ) if $languages[0];
+
+            # URL detection
+            if ( my $path = $self->req->url->path ) {
+                my $part = $path->parts->[0];
+
+                if ( $part && $langs && grep { $part eq $_ } @$langs ) {
+
+                    # Ignore static files
+                    return if $self->res->code;
+
+                    $self->app->log->debug("Found language $part in URL $path");
+
+                    unshift @languages, $part;
+
+                    # Save lang in stash
+                    $self->stash( lang => $part );
+
+                    # Clean path
+                    shift @{ $path->parts };
+                    $path->trailing_slash(0);
+                }
+            }
+
+            # Languages
+            $self->language( @languages, $default );
+        }
+    );
+
+    # Reimplement "url_for" helper
+    my $mojo_url_for = *Mojolicious::Controller::url_for{CODE};
+
+    my $i18n_url_for = sub {
+        my $self = shift;
+        my $url  = $self->$mojo_url_for(@_);
+
+        # Absolute URL
+        return $url if $url->is_abs;
+
+        # Discard target if present
+        shift if ( @_ % 2 && !ref $_[0] ) || ( @_ > 1 && ref $_[-1] );
+
+        # Unveil params
+        my %params = @_ == 1 ? %{ $_[0] } : @_;
+
+        # Detect lang
+        if ( my $lang = $params{lang} || $self->stash('lang') ) {
+            my $path = $url->path || [];
+
+            # Root
+            if ( !$path->[0] ) {
+                $path->parts( [$lang] );
+            }
+
+            # No language detected
+            elsif ( ref $langs ne 'ARRAY'
+                or not scalar grep { $path->contains("/$_") } @$langs )
+            {
+                unshift @{ $path->parts }, $lang;
+            }
+        }
+
+        $url;
+    };
+
+    {
+        no strict 'refs';
+        no warnings 'redefine';
+
+        *Mojolicious::Controller::url_for = $i18n_url_for;
+    }
+};
 
 1;
 __END__
