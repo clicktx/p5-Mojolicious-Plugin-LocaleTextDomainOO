@@ -18,7 +18,13 @@ sub register {
 
     # Initialize
     my $file_type = $plugin_config->{file_type} || 'po';
-    my $default = $plugin_config->{default} || 'en';
+    my $default   = $plugin_config->{default}   || 'en';
+    $default =~ tr/-A-Z/_a-z/;
+    $default =~ tr/_a-z0-9//cd;
+
+    my $langs = $plugin_config->{support_url_langs};
+    my $hosts = $plugin_config->{support_hosts};
+
     my $plugins = $plugins_default;
     push @$plugins, @{ $plugin_config->{plugins} }
       if ( ref $plugin_config->{plugins} eq 'ARRAY' );
