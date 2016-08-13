@@ -251,9 +251,12 @@ Mojolicious::Plugin::LocaleTextDomainOO - I18N(GNU getext) for Mojolicious.
             languages => [ qw( en-US en ja-JP ja de-DE de ) ],
 
             # Mojolicious::Plugin::I18N like options
-            no_header_detect => 1,
-            support_url_langs => [ qw( en ja de ) ],
-            support_hosts => { 'mojolicious.ru' => 'ru', 'mojolicio.us' => 'en' }
+            no_header_detect => $boolean,               # option. default: false
+            support_url_langs => [ qw( en ja de ) ],    # option
+            support_hosts => {                          # option
+                'mojolicious.ru' => 'ru',
+                'mojolicio.us' => 'en'
+            }
         }
       );
 
