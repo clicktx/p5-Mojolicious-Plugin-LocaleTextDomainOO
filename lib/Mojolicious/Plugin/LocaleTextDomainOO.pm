@@ -54,7 +54,7 @@ sub register {
     };
 
     # Add hook and replace url_for helper
-    $Mojolicious::Plugin::I18N::code->( $app, $plugin_config );
+    $Mojolicious::Plugin::LocaleTextDomainOO::I18N::code->( $app, $plugin_config );
 
     # Add "locale" helper
     $app->helper( locale => $loc );
@@ -104,7 +104,7 @@ sub register {
 #######################################################################
 ###  This code is Mojolicious::Plugin::I18N
 #######################################################################
-package Mojolicious::Plugin::I18N;
+package Mojolicious::Plugin::LocaleTextDomainOO::I18N;
 
 our $code = sub {
     my ( $app, $conf ) = @_;
