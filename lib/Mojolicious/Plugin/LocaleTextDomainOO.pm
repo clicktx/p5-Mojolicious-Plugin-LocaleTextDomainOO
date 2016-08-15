@@ -9,7 +9,7 @@ use I18N::LangTags::Detect;
 
 use constant DEBUG => $ENV{MOJO_I18N_DEBUG} || 0;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 has 'po' => sub { Locale::TextDomain::OO::Lexicon::File::PO->new };
 has 'mo' => sub { Locale::TextDomain::OO::Lexicon::File::MO->new };
