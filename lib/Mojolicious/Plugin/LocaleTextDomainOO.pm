@@ -274,11 +274,11 @@ Mojolicious::Plugin::LocaleTextDomainOO - I18N(GNU getext) for Mojolicious.
 
 =head1 DESCRIPTION
 
-L<Locale::TextDomain::OO> is a I18N tool of perl OO interface.
+L<Locale::TextDomain::OO> is a internationalisation(I18N) tool of perl OO interface.
 L<Mojolicious::Plugin::LocaleTextDomainOO> is internationalization  plugin for L<Mojolicious>.
 
 This module is similar to L<Mojolicious::Plugin::I18N>.
-But, L<Locale::MakeText> is not using "text domain"...
+But, L<Locale::MakeText> is not using "text domain" and more...
 
 =head1 OPTIONS
 
