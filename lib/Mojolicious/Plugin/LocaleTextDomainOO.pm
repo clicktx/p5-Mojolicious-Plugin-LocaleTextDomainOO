@@ -9,7 +9,7 @@ use I18N::LangTags::Detect;
 
 use constant DEBUG => $ENV{MOJO_I18N_DEBUG} || 0;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 has 'po' => sub { Locale::TextDomain::OO::Lexicon::File::PO->new };
 has 'mo' => sub { Locale::TextDomain::OO::Lexicon::File::MO->new };
@@ -54,7 +54,9 @@ sub register {
     };
 
     # Add hook and replace url_for helper
-    $Mojolicious::Plugin::LocaleTextDomainOO::I18N::code->( $app, $plugin_config );
+    $Mojolicious::Plugin::LocaleTextDomainOO::I18N::code->(
+        $app, $plugin_config
+    );
 
     # Add "locale" helper
     $app->helper( locale => $loc );
@@ -91,13 +93,17 @@ sub register {
         qw/
           __  __x  __n  __nx  __p  __px  __np  __npx
           N__  N__x  N__n  N__nx  N__p  N__px  N__np  N__npx
-          __begin_d  __end_d  __d  __dn  __dp  __dnp  __dx  __dnx  __dpx  __dnpx
+          __d  __dn  __dp  __dnp  __dx  __dnx  __dpx  __dnpx
           N__d  N__dn  N__dp  N__dnp  N__dx  N__dnx  N__dpx  N__dnpx
           /
     );
-
     foreach my $method (@methods) {
         $app->helper( $method => sub { shift->app->locale->$method(@_) } );
+    }
+
+    foreach my $method (qw /__begin_d  __end_d/) {
+        $app->helper( $method => sub { shift->app->locale->$method(@_); undef; }
+        );
     }
 }
 
