@@ -403,6 +403,12 @@ See L<Locale::TextDomain::OO::Plugin::Expand::Gettext>
     # In template
     <%= __d 'domain', 'hello' %>
 
+    # begin, end
+    <%= __begin_d 'domain' %>
+        <%= __ 'hello' %>
+        <%= __ 'hello2' %>
+    <%= __end_d %>
+
 See L<Locale::TextDomain::OO::Plugin::Expand::Gettext::DomainAndCategory>
 
 =head2 C<N__d, N__dn, N__dp, N__dnp, N__dx, N__dnx, N__dpx, N__dnpx>
