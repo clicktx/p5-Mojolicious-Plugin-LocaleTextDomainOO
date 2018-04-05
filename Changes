@@ -1,6 +1,7 @@
 Revision history for Perl extension Mojolicious-Plugin-LocaleTextDomainOO
 
 {{$NEXT}}
+    - bump version inherits modules
 
 0.04 2016-08-20T01:57:44Z
 
